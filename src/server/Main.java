@@ -1,19 +1,15 @@
 package src.server;
 
-public class Main {
-    public static void main(String[] args) {
-        var g = new CheckerGame();
-        g.CliBoard();
-        var move = new GraphMoves(new Position(5, 0));
-        move.add(new GraphMoves(new Position(4, 1)));
+import java.rmi.AlreadyBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 
-        try {
-            g.makeMove(-1, move);
-        } catch (NotTurnException | TooManyMoveOptions | PlayersPieceNotFoundException | UncompleteMoveException |
-                 IllegalMoveException | GameOverException e) {
-            throw new RuntimeException(e);
-        }
-        g.CliBoard();
-        System.out.println(g.isTheGameOver());
+public class Main {
+    public static void main(String[] args) throws RemoteException, AlreadyBoundException {
+        Server server = new Server();
+        Registry registry = LocateRegistry.createRegistry(1099);
+        registry.bind("server", server);
+        System.out.println("Server started!");
     }
 }

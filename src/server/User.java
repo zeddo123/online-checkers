@@ -9,4 +9,9 @@ public class User {
     public User(ClientIterface client, GameMetaData metaData) {
         this.client = client; this.metaData = metaData;
     }
+
+    public boolean equals(ClientIterface client) {
+        return this.client.equals(client);
+    }
+
 }
