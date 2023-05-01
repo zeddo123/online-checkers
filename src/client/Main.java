@@ -8,7 +8,8 @@ public class Main {
     public static void main(String[] args) throws NotBoundException, RemoteException {
         var c = new Client();
         System.out.println("Client Side");
-        c.remoteServer.deregisterPlayer(c);
-        UnicastRemoteObject.unexportObject(c, false);
+
+        //c.remoteServer.deregisterPlayer(c);
+        //UnicastRemoteObject.unexportObject(c, false);
     }
 }

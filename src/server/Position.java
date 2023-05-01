@@ -1,9 +1,10 @@
 package src.server;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Position {
+public class Position implements Serializable {
     protected int x;
     protected int y;
 

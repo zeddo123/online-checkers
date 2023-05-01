@@ -10,6 +10,33 @@ public class GraphMoves implements List<GraphMoves> {
         this.position = p;
     }
 
+    public static List<List<Position>> AllPaths(List<GraphMoves> graphMoves) {
+        List<List<Position>> result = new ArrayList<>();
+        for(var graph : graphMoves){
+            List<List<Position>> paths = new ArrayList<>();
+            graph.listAllPaths(new ArrayList<>(), paths);
+            result.addAll(paths);
+        }
+        return result;
+    }
+
+    public static GraphMoves toGraph(List<Position> path) {
+        GraphMoves nextNode;
+        GraphMoves oldgraph = null;
+        GraphMoves first = new GraphMoves(new Position(0,0));
+        for (var node : path){
+            if (oldgraph == null){
+                oldgraph = new GraphMoves(node);
+                first = oldgraph;
+                continue;
+            }
+            nextNode = new GraphMoves(node);
+            oldgraph.add(nextNode);
+            oldgraph = nextNode;
+        }
+        return first;
+    }
+
     public void PrettyPrint(String currPath, List<String> paths) {
         if (this.isEmpty()) {
             currPath += this.position;
@@ -150,6 +177,19 @@ public class GraphMoves implements List<GraphMoves> {
             return children.get(0).isPathological();
         else
             return false;
+    }
+
+    public void listAllPaths(List<Position> currPath, List<List<Position>> paths) {
+        var path = new ArrayList<>(currPath);
+        if (this.isEmpty()) {
+            path.add(this.position);
+            paths.add(path);
+            return;
+        }
+
+        path.add(this.position);
+        for (var child : children)
+            child.listAllPaths(path, paths);
     }
 
     public List<Position> toList() throws NotPathologicalException {

@@ -6,12 +6,12 @@ import java.util.List;
 public class CheckerGame {
     private List<Piece> p1Pieces = new ArrayList<>();
     private List<Piece> p2Pieces = new ArrayList<>();
-    private int turn = -1;
+    public int turn = -1;
 
     // 0 - Game isn't over yet.
     // 1 - Player 1 won the game
     // -1 - Player 2 won the game
-    private int gameover = 0;
+    public int gameover = 0;
 
     CheckerGame() {
         int i;
@@ -177,6 +177,10 @@ public class CheckerGame {
 
     public List<GraphMoves> allPossibleMovesp2() {
         return allPossibleMoves(this.p2Pieces, -1);
+    }
+
+    public List<GraphMoves> allPossibleMovesOf(int player) {
+        return allPossibleMoves(currPlayerPieces(player), player);
     }
 
     public String toString() {

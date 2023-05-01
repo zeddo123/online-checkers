@@ -76,10 +76,21 @@ public class Server implements ServerInterface {
         waitingPool.remove(user1);
         waitingPool.remove(user2);
 
-        var session = new Session(user1, user2);
+        Session session = null;
+        try {
+            session = new Session(user1, user2);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
         runningGames.add(session);
 
-        // TODO: Broadcast new Session to concerned users here
+        // Broadcast new Session to concerned users here
+        try {
+            user1.client.joinedSession(session);
+            user2.client.joinedSession(session);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
 
         return session;
     }
