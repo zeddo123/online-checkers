@@ -79,6 +79,9 @@ public class CheckerGame {
 
         // Complete the turn
         turn *= -1;
+        if (isTheGameOver()){
+            throw new GameOverException();
+        }
     }
 
     public boolean isTheGameOver() {

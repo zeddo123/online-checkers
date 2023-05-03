@@ -41,7 +41,6 @@ public class CheckersBoard extends GridPane {
                                 case UnCompleteMove -> UI.showAlert("Uncomplete");
                                 case TooManyMoveOptions -> UI.showAlert("Too many options");
                                 case IllegalMove -> UI.showAlert("Illegal move");
-                                case GameOver -> UI.showAlert("Game is over");
                                 default -> UI.showAlert("other problem");
                             }
                         }

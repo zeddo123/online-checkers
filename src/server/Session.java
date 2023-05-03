@@ -32,29 +32,27 @@ public class Session implements SessionInterface {
         return pair.contains(self).user2;
     }
 
+    public boolean notifyEndOfGame() {
+        if(game.isTheGameOver()){
+            var winner = game.gameover == pair.user1.metaData.gameid ? pair.user1.client : pair.user2.client;
+            var loser = game.gameover != pair.user1.metaData.gameid ? pair.user1.client : pair.user2.client;
+            try {
+                System.out.println("Ending Game");
+                winner.wonGame();
+                loser.lostGame();
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+            return true;
+        }
+        return false;
+    }
     @Override
     public boolean isTurn(ClientIterface self) {
         var p = pair.contains(self);
         var user = p.user1;
-        var opp = p.user2;
-        if(game.isTheGameOver()){
-            if(game.gameover == user.metaData.gameid){
-                try {
-                    user.client.wonGame();
-                    opp.client.lostGame();
-                } catch (RemoteException e) {
-                    //throw new RuntimeException(e);
-                }
-            } else {
-                try {
-                    opp.client.wonGame();
-                    user.client.lostGame();
-                } catch (RemoteException e) {
-
-                }
-            }
-        }
-        return game.turn == pair.contains(self).user1.metaData.gameid;
+        //notifyEndOfGame();
+        return game.turn == user.metaData.gameid;
     }
 
     @Override
@@ -78,7 +76,6 @@ public class Session implements SessionInterface {
             game.makeMove(user.metaData.gameid, GraphMoves.toGraph(move));
             opp.client.OnBoardChanged(game.currPlayerPieces(opp.metaData.gameid), game.currPlayerPieces(user.metaData.gameid));
             user.client.OnBoardChanged(game.currPlayerPieces(user.metaData.gameid), game.currPlayerPieces(opp.metaData.gameid));
-            System.out.println("User making move " + move);
             return null;
         } catch (RemoteException e) {
             System.out.println("Couldn't access remote object!");
@@ -92,6 +89,7 @@ public class Session implements SessionInterface {
         } catch (IllegalMoveException e) {
             return MoveError.IllegalMove;
         } catch (GameOverException e) {
+            notifyEndOfGame();
             return MoveError.GameOver;
         } catch (PlayersPieceNotFoundException e) {
             return MoveError.PlayerPieceNotFound;
