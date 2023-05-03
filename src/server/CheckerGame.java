@@ -1,11 +1,13 @@
 package src.server;
 
+import src.shared.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class CheckerGame {
-    private List<Piece> p1Pieces = new ArrayList<>();
-    private List<Piece> p2Pieces = new ArrayList<>();
+    public List<Piece> p1Pieces = new ArrayList<>();
+    public List<Piece> p2Pieces = new ArrayList<>();
     public int turn = -1;
 
     // 0 - Game isn't over yet.
@@ -54,13 +56,12 @@ public class CheckerGame {
         if (moves.size() < 2)
             throw new UncompleteMoveException();
 
-        System.out.println(moves);
 
         var piece = getPiece(player, moves.get(0));
         if (piece == null)
             throw new PlayersPieceNotFoundException();
 
-        var legalMoves = possibleMoves(piece, player, true, null, false);
+        var legalMoves = possibleMoves(player, piece, player, true, null, false);
         if (!legalMoves.isPath(move)) {
             throw new IllegalMoveException();
         }
@@ -72,6 +73,8 @@ public class CheckerGame {
             lastmove = p;
         }
         piece.changePosition(lastmove);
+        if(piece.becomesKing(player))
+            piece.king = true;
         currPlayerPieces(player).add(piece);
 
         // Complete the turn
@@ -117,7 +120,12 @@ public class CheckerGame {
         return false;
     }
 
-    public GraphMoves possibleMoves(Piece p, int direction, boolean hop, Position diagonalTo, boolean onlyOccup) {
+    public GraphMoves possibleMoves(int id, Piece p, int direction, boolean hop, Position diagonalTo, boolean onlyOccup) {
+        var pp = getPiece(direction, p);
+        if (pp != null) {
+            p = pp;
+        }
+
         var graph = new GraphMoves(p);
 
         var rows = new ArrayList<Integer>();
@@ -128,22 +136,20 @@ public class CheckerGame {
             rows.add(p.x - direction);
 
         for (int row : rows) {
+            if(row == (p.x - direction))
+                direction *= -1;
             for (int col : cols) {
                 var position = new Piece(row, col);
                 if (!onlyOccup && !occupied(position)){
                     if (diagonalTo == null) {
-                        //moves.put(position, new Moves<>());
                         graph.add(new GraphMoves(position));
                     } else if (diagonalTo.diagonal(position)) {
-                       //moves.put(position, possibleMoves(position, direction, true, p, true));
-                       graph.add(possibleMoves(position, direction, true, p, true));
+                       graph.add(possibleMoves(id, position, direction, true, p, true));
                     }
-                } else if (hop && opponentsPiece(position, -1 * direction)) {
-                    //moves.put(
-                    //        position,
-                    //        possibleMoves(position, direction, false, p, false)
-                    //);
-                    graph.add(possibleMoves(position, direction, false, p, false));
+                } else if (hop && opponentsPiece(position, -1 * id)) {
+                    var g = possibleMoves(id, position, direction, false, p, false);
+                    if (!g.isEmpty())
+                        graph.add(g);
                 }
             }
         }
@@ -164,7 +170,7 @@ public class CheckerGame {
         List<GraphMoves> result = new ArrayList<>();
 
         for (Piece p : pieces){
-            var moves = possibleMoves(p, direction, true, null, false);
+            var moves = possibleMoves(direction, p, direction, true, null, false);
             if (moves.size() > 0)
                 result.add(moves);
         }

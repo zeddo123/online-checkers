@@ -1,5 +1,7 @@
 package src.server;
 
+import javafx.geometry.Pos;
+
 import java.util.*;
 
 public class GraphMoves implements List<GraphMoves> {
@@ -18,6 +20,12 @@ public class GraphMoves implements List<GraphMoves> {
             result.addAll(paths);
         }
         return result;
+    }
+
+    public static List<List<Position>> AllPaths(GraphMoves graph) {
+        var l = new ArrayList<GraphMoves>();
+        l.add(graph);
+        return AllPaths(l);
     }
 
     public static GraphMoves toGraph(List<Position> path) {

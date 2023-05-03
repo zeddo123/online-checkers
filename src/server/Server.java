@@ -19,8 +19,8 @@ public class Server implements ServerInterface {
 
     @Override
     public boolean registerPlayer(ClientIterface client, GameMetaData metaData) {
-        System.out.println("New client" + client);
         waitingPool.add(new User(client, metaData));
+        System.out.println("New Player added to waiting pool");
         startNewSession();
         return true;
     }
@@ -37,6 +37,7 @@ public class Server implements ServerInterface {
     }
 
     private boolean removeFromSession(ClientIterface client) {
+        System.out.println("Trying to remove from session");
         for(var session : runningGames){
             var pair = session.pair.contains(client);
             if (pair == null)
@@ -45,6 +46,7 @@ public class Server implements ServerInterface {
             try {
                 victim.client.Deregistered();
             } catch (RemoteException e) {
+                System.out.println("Couldn't deregister victim");
             }
             runningGames.remove(session);
             System.out.println("User removed from Session; and the Session itself.");
@@ -61,6 +63,7 @@ public class Server implements ServerInterface {
             } catch (RemoteException e) {
                 System.out.println("Couldn't deregister client");
             }
+            System.out.println("Player disconnected!");
             return true;
         }
         return false;
@@ -88,6 +91,8 @@ public class Server implements ServerInterface {
         try {
             user1.client.joinedSession(session);
             user2.client.joinedSession(session);
+            user1.client.OnBoardChanged(session.getGame().currPlayerPieces(user1.metaData.gameid), session.getGame().currPlayerPieces(user2.metaData.gameid));
+            user2.client.OnBoardChanged(session.getGame().currPlayerPieces(user2.metaData.gameid), session.getGame().currPlayerPieces(user1.metaData.gameid));
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }

@@ -1,4 +1,4 @@
-package src.server;
+package src.shared;
 
 public class TooManyMoveOptions extends Throwable {
 }

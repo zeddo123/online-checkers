@@ -6,6 +6,11 @@ public class Piece extends Position {
         super(x, y);
     }
 
+    public Piece(int x, int y, boolean b) {
+        super(x, y);
+        king = b;
+    }
+
     public String toString() {
         if (!king)
             return "(" + x + ", " + y + ")";

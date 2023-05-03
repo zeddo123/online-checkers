@@ -1,14 +1,11 @@
 package src.server;
 
-import src.shared.ClientIterface;
-import src.shared.SessionInterface;
+import src.shared.*;
 
 import java.awt.*;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Session implements SessionInterface {
     private CheckerGame game = new CheckerGame();
@@ -29,6 +26,10 @@ public class Session implements SessionInterface {
     @Override
     public ClientIterface getOpponent(ClientIterface self) {
         return pair.contains(self).user2.client;
+    }
+
+    public User getOpponentUser(ClientIterface self) {
+        return pair.contains(self).user2;
     }
 
     @Override
@@ -58,14 +59,18 @@ public class Session implements SessionInterface {
 
     @Override
     public List<List<Position>> getPossibleMoves(ClientIterface self) {
-        game.CliBoard();
         var user = pair.contains(self).user1;
-        System.out.println(game.allPossibleMovesOf(user.metaData.gameid));
         return GraphMoves.AllPaths(game.allPossibleMovesOf(user.metaData.gameid));
     }
 
     @Override
-    public boolean makeMove(ClientIterface self, List<Position> move) {
+    public List<List<Position>> getPossiblePieceMoves(ClientIterface self, Piece p) {
+        var user = pair.contains(self).user1;
+        return GraphMoves.AllPaths(game.possibleMoves(user.metaData.gameid, p, user.metaData.gameid, true, null, false));
+    }
+
+    @Override
+    public MoveError makeMove(ClientIterface self, List<Position> move) {
         var p = pair.contains(self);
         var user = p.user1;
         var opp = p.user2;
@@ -73,19 +78,28 @@ public class Session implements SessionInterface {
             game.makeMove(user.metaData.gameid, GraphMoves.toGraph(move));
             opp.client.OnBoardChanged(game.currPlayerPieces(opp.metaData.gameid), game.currPlayerPieces(user.metaData.gameid));
             user.client.OnBoardChanged(game.currPlayerPieces(user.metaData.gameid), game.currPlayerPieces(opp.metaData.gameid));
-            return true;
-        } catch (NotTurnException | RemoteException e) {
-            return false;
-        } catch (TooManyMoveOptions e) {
-            return false;
-        } catch (PlayersPieceNotFoundException e) {
-            return false;
+            System.out.println("User making move " + move);
+            return null;
+        } catch (RemoteException e) {
+            System.out.println("Couldn't access remote object!");
+            return MoveError.ServerSideError;
         } catch (UncompleteMoveException e) {
-            return false;
+            return MoveError.UnCompleteMove;
+        } catch (NotTurnException e) {
+            return MoveError.NotTurn;
+        } catch (TooManyMoveOptions e) {
+            return MoveError.TooManyMoveOptions;
         } catch (IllegalMoveException e) {
-            return false;
+            return MoveError.IllegalMove;
         } catch (GameOverException e) {
-            return false;
+            return MoveError.GameOver;
+        } catch (PlayersPieceNotFoundException e) {
+            return MoveError.PlayerPieceNotFound;
         }
+    }
+
+    @Override
+    public Color getOpponentColor(ClientIterface client) throws RemoteException {
+        return getOpponentUser(client).metaData.color;
     }
 }

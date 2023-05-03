@@ -12,6 +12,14 @@ public class Position implements Serializable {
         this.x = x; this.y = y;
     }
 
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
     public List<Integer> possibleCols() {
         var l = new ArrayList<Integer>();
         if (y - 1 >= 0)
@@ -59,5 +67,12 @@ public class Position implements Serializable {
     public void changePosition(Position newPosition) {
         this.x = newPosition.x;
         this.y = newPosition.y;
+    }
+
+    public boolean becomesKing(int player) {
+        if(player == 1)
+            return this.x == 7;
+        else
+            return this.x == 0;
     }
 }
